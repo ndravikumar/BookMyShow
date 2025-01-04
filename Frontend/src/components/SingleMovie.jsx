@@ -12,9 +12,11 @@ const SingleMovie = () => {
   const params = useParams();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const [movie, setMovie] = useState();
   const [theatres, setTheatres] = useState([]);
   const [date, setDate] = useState(moment().format("YYYY-MM-DD"));
+
   const getData = async () => {
     try {
       dispatch(showLoading());
@@ -30,6 +32,7 @@ const SingleMovie = () => {
       dispatch(hideLoading());
     }
   };
+
   const getAllTheatres = async () => {
     try {
       dispatch(showLoading());
@@ -45,6 +48,7 @@ const SingleMovie = () => {
       message.err(err.message);
     }
   };
+
   const handleDate = (e) => {
     setDate(moment(e.target.value).format("YYYY-MM-DD"));
     navigate(`/movie/${params.id}?date=${e.target.value}`);
@@ -52,6 +56,7 @@ const SingleMovie = () => {
   useEffect(() => {
     getData();
   }, []);
+
   useEffect(() => {
     getAllTheatres();
   }, [date]);
@@ -144,4 +149,5 @@ const SingleMovie = () => {
     </div>
   );
 };
+
 export default SingleMovie;

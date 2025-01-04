@@ -1,11 +1,10 @@
 import React, { useEffect } from "react";
-import PropTypes from "prop-types";
-import { Link, useNavigate } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
-import { Layout, Menu, message } from "antd";
+import { Link, useNavigate } from "react-router-dom";
 import { hideLoading, showLoading } from "../redux/loaderSlice";
 import { GetCurrentUser } from "../api/user";
 import { setUser } from "../redux/userSlice";
+import { Layout, Menu, message } from "antd";
 import { Header } from "antd/es/layout/layout";
 import {
   HomeOutlined,
@@ -44,8 +43,8 @@ const ProtectedRoute = ({ children }) => {
               onClick={() => {
                 if (user.role === "admin") {
                   navigate("/admin", { replace: true });
-                } else if (user.role === "patner") {
-                  navigate("/patner", { replace: true });
+                } else if (user.role === "partner") {
+                  navigate("/partner", { replace: true });
                 } else {
                   navigate("/profile", { replace: true });
                 }
@@ -73,6 +72,7 @@ const ProtectedRoute = ({ children }) => {
       ],
     },
   ];
+
   const getValidUser = async () => {
     try {
       dispatch(showLoading());
@@ -89,10 +89,9 @@ const ProtectedRoute = ({ children }) => {
     if (localStorage.getItem("tokenForBMS")) {
       getValidUser();
     } else {
-      navigate("login");
+      navigate("/login");
     }
   }, []);
-
   return (
     user && (
       <>
@@ -126,7 +125,3 @@ const ProtectedRoute = ({ children }) => {
 };
 
 export default ProtectedRoute;
-
-ProtectedRoute.propTypes = {
-  children: PropTypes.any,
-};

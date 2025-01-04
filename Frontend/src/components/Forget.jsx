@@ -10,6 +10,7 @@ const Forget = () => {
       navigate("/");
     }
   }, []);
+
   const onFinish = async (values) => {
     try {
       const response = await ForgetPassword(values);
@@ -52,6 +53,7 @@ const Forget = () => {
                   placeholder="Enter your Email"
                 ></Input>
               </Form.Item>
+
               <Form.Item className="d-block">
                 <Button
                   type="primary"

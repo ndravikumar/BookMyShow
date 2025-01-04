@@ -1,4 +1,5 @@
 import { axiosInstance } from ".";
+
 export const addTheatre = async (payload) => {
   try {
     const response = await axiosInstance.post("/theatres/addTheatre", payload);
@@ -7,6 +8,7 @@ export const addTheatre = async (payload) => {
     return err.response;
   }
 };
+
 export const updateTheatre = async (payload) => {
   try {
     const response = await axiosInstance.patch(
@@ -18,6 +20,7 @@ export const updateTheatre = async (payload) => {
     return err.resposne;
   }
 };
+
 export const getAllTheatres = async (payload) => {
   try {
     const response = await axiosInstance.get("/theatres/getAllTheatresByOwner");
@@ -26,6 +29,7 @@ export const getAllTheatres = async (payload) => {
     return err.response;
   }
 };
+
 export const getAllTheatresForAdmin = async () => {
   try {
     const response = await axiosInstance.get("/theatres/getAllTheatres");
@@ -34,6 +38,7 @@ export const getAllTheatresForAdmin = async () => {
     return err.response;
   }
 };
+
 export const deleteTheatre = async (payload) => {
   try {
     const response = await axiosInstance.delete(

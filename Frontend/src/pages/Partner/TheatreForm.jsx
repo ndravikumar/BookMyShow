@@ -4,6 +4,7 @@ import TextArea from "antd/es/input/TextArea";
 import { hideLoading, showLoading } from "../../redux/loaderSlice";
 import { addTheatre, updateTheatre } from "../../api/theatre";
 import { useDispatch, useSelector } from "react-redux";
+
 const TheatreForm = ({
   isModalOpen,
   setIsModalOpen,
@@ -19,15 +20,10 @@ const TheatreForm = ({
       dispatch(showLoading());
       let response = null;
       if (formType === "add") {
-        response = await addTheatre({
-          ...values,
-          owner: user._id,
-        });
+        response = await addTheatre({ ...values, owner: user._id });
       } else {
-        response = await updateTheatre({
-          ...values,
-          theatreId: selectedTheatre._id,
-        });
+        values.theatreId = selectedTheatre._id;
+        response = await updateTheatre(values);
       }
       if (response.success) {
         message.success(response.message);
@@ -161,4 +157,5 @@ const TheatreForm = ({
     </Modal>
   );
 };
+
 export default TheatreForm;

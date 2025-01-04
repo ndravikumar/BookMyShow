@@ -1,16 +1,17 @@
-import { useEffect } from "react";
-import { Routes, Route, useNavigate } from "react-router-dom";
 import Home from "./components/Home";
 import Login from "./components/Login";
 import Register from "./components/Register";
+import { Routes, Route, useNavigate } from "react-router-dom";
+
 import ProtectedRoute from "./components/ProtectedRoute";
-import Profile from "./pages/Profille";
+import Profile from "./pages/Profile";
+import Partner from "./pages/Partner";
 import Admin from "./pages/Admin";
-import Patner from "./pages/Patner";
 import { setupAxiosInterceptors } from "./api";
+import { useEffect } from "react";
 import SingleMovie from "./components/SingleMovie";
 import BookShow from "./components/BookShow";
-import Forget from "./components/Forgot";
+import Forget from "./components/Forget";
 import Reset from "./components/Reset";
 import { useSelector } from "react-redux";
 
@@ -19,11 +20,9 @@ function App() {
   const { loading } = useSelector((state) => {
     return state.loader;
   });
-
   useEffect(() => {
     setupAxiosInterceptors(navigate);
   }, [navigate]);
-
   return (
     <>
       {loading && (
@@ -57,13 +56,15 @@ function App() {
           }
         />
         <Route
-          path="/patner"
+          path="/partner"
           element={
             <ProtectedRoute>
-              <Patner />
+              <Partner />
             </ProtectedRoute>
           }
         />
+        <Route path="/login" element={<Login />} />
+        <Route path="/register" element={<Register />} />
         <Route
           path="/movie/:id"
           element={
@@ -80,8 +81,6 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/login" element={<Login />} />
-        <Route path="/register" element={<Register />} />
         <Route path="/forget" element={<Forget />} />
         <Route path="/reset" element={<Reset />} />
       </Routes>

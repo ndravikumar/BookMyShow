@@ -1,41 +1,37 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Form, Input, Button, message } from "antd";
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect } from "react";
+import { LoginUser } from "../api/user";
 import { useDispatch } from "react-redux";
 import { hideLoading, showLoading } from "../redux/loaderSlice";
-import { LoginUser } from "../api/user";
 
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const onFinish = async (values) => {
     try {
-      dispatch(showLoading);
+      dispatch(showLoading());
       const response = await LoginUser(values);
       if (response?.success) {
         message.success(response?.message);
         localStorage.setItem("tokenForBMS", response?.data);
         navigate("/");
-      } else if (response?.message === "Invalid credentials") {
+      } else if (response?.message === "Please enter valid password") {
+        // to do
         message.error(response?.message);
-      } else {
-        message.warning(response?.message);
       }
     } catch (error) {
       message.error(error);
-      console.log(error);
     } finally {
-      dispatch(hideLoading);
+      dispatch(hideLoading());
     }
   };
 
   useEffect(() => {
     if (localStorage.getItem("tokenForBMS")) {
-      navigate("/");
+      navigate("/", { replace: true });
     }
   }, []);
-
   return (
     <header className="App-header">
       <main className="main-area mw-500 text-center px-3">
@@ -94,4 +90,5 @@ const Login = () => {
     </header>
   );
 };
+
 export default Login;

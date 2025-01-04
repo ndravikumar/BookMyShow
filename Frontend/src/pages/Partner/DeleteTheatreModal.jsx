@@ -3,6 +3,7 @@ import { useDispatch } from "react-redux";
 import { hideLoading, showLoading } from "../../redux/loaderSlice";
 import { message, Modal } from "antd";
 import { deleteTheatre } from "../../api/theatre";
+
 const DeleteTheatreModal = ({
   isDeleteModalOpen,
   setIsDeleteModalOpen,
@@ -11,6 +12,7 @@ const DeleteTheatreModal = ({
   getData,
 }) => {
   const dispatch = useDispatch();
+
   const handleOk = async () => {
     try {
       dispatch(showLoading());
@@ -30,6 +32,7 @@ const DeleteTheatreModal = ({
       setSelectedTheatre(null);
     }
   };
+
   const handleCancel = () => {
     setIsDeleteModalOpen(false);
     setSelectedTheatre(null);
@@ -46,10 +49,11 @@ const DeleteTheatreModal = ({
           Are you sure you want to delete this theatre?
         </p>
         <p className="pb-3 fs-18">
-          This action can&apos;t be undone and you&apos;ll lose this theatre data.
+          This action can't be undone and you'll lose this theatre data.
         </p>
       </Modal>
     </>
   );
 };
+
 export default DeleteTheatreModal;

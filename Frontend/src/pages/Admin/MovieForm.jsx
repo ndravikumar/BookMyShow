@@ -1,5 +1,5 @@
-import React from "react";
 import { Col, Modal, Row, Form, Input, Select, Button, message } from "antd";
+import React from "react";
 import moment from "moment";
 import TextArea from "antd/es/input/TextArea";
 import { useDispatch } from "react-redux";
@@ -15,15 +15,18 @@ const MovieForm = ({
   formType,
 }) => {
   const dispatch = useDispatch();
+
   if (selectedMovie) {
     selectedMovie.releaseDate = moment(selectedMovie.releaseDate).format(
       "YYYY-MM-DD"
     );
   }
+
   const handleCancel = () => {
     setIsModalOpen(false);
     setSelectedMovie(null);
   };
+
   const onFinish = async (values) => {
     try {
       dispatch(showLoading());
@@ -182,4 +185,5 @@ const MovieForm = ({
     </Modal>
   );
 };
+
 export default MovieForm;

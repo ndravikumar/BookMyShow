@@ -17,6 +17,7 @@ export const updateMovie = async (payload) => {
     return error;
   }
 };
+
 export const deleteMovie = async (payload) => {
   try {
     const response = await axiosInstance.delete(

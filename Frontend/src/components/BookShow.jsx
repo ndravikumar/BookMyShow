@@ -7,7 +7,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { message, Card, Row, Col, Button } from "antd";
 import moment from "moment";
 import StripeCheckout from "react-stripe-checkout";
-import { makePaymentAndBookShow } from "../api/booking";
+import { bookShow, makePayment, makePaymentAndBookShow } from "../api/booking";
 
 const BookShow = () => {
   const params = useParams();
@@ -31,10 +31,12 @@ const BookShow = () => {
       dispatch(hideLoading());
     }
   };
+
   const getSeats = () => {
     let columns = 12;
     let totalSeats = show.totalSeats;
     let rows = Math.ceil(totalSeats / columns);
+
     return (
       <div
         style={{
@@ -108,8 +110,8 @@ const BookShow = () => {
       } else {
         message.error(response.message);
       }
-    } catch (error) {
-      message.error(error);
+    } catch (err) {
+      message.error(err);
     } finally {
       dispatch(hideLoading());
     }
@@ -155,6 +157,7 @@ const BookShow = () => {
               style={{ width: "100%" }}
             >
               {getSeats()}
+
               {selectedSeats.length > 0 && (
                 <StripeCheckout
                   token={bookAndPay}
@@ -176,4 +179,5 @@ const BookShow = () => {
     </div>
   );
 };
+
 export default BookShow;

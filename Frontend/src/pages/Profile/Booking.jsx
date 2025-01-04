@@ -9,6 +9,7 @@ import { Link } from "react-router-dom";
 const Booking = () => {
   const [bookings, setBookings] = useState([]);
   const dispatch = useDispatch();
+
   const getData = async () => {
     try {
       dispatch(showLoading());
@@ -18,15 +19,18 @@ const Booking = () => {
       } else {
         message.error(response.message);
       }
+
       dispatch(hideLoading());
     } catch (err) {
       message.error(err.message);
       dispatch(hideLoading());
     }
   };
+
   useEffect(() => {
     getData();
   }, []);
+
   return (
     <>
       {bookings && (
@@ -75,9 +79,10 @@ const Booking = () => {
           })}
         </Row>
       )}
+
       {!bookings.length && (
         <div className="text-center pt-3">
-          <h1>You&apos;ve not booked any show yet!</h1>
+          <h1>You've not booked any show yet!</h1>
           <Link to="/">
             <Button type="primary">Start Booking</Button>
           </Link>
@@ -86,4 +91,5 @@ const Booking = () => {
     </>
   );
 };
+
 export default Booking;

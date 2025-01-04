@@ -5,7 +5,6 @@ export const RegisterUser = async (values) => {
     const response = await axiosInstance.post("/users/register", values);
     return response.data;
   } catch (error) {
-    console.log(error);
     return error;
   }
 };
@@ -15,7 +14,6 @@ export const LoginUser = async (values) => {
     const response = await axiosInstance.post("/users/login", values);
     return response.data;
   } catch (error) {
-    console.log(error);
     return error;
   }
 };
@@ -25,7 +23,6 @@ export const GetCurrentUser = async () => {
     const response = await axiosInstance.get("/users/getCurrentUser");
     return response.data;
   } catch (error) {
-    console.log(error);
     return error;
   }
 };

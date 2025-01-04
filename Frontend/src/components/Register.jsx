@@ -1,37 +1,33 @@
 import React, { useEffect } from "react";
 import { Form, Input, Button, message, Radio } from "antd";
 import { Link, useNavigate } from "react-router-dom";
+import { RegisterUser } from "../api/user";
 import { useDispatch } from "react-redux";
 import { hideLoading, showLoading } from "../redux/loaderSlice";
-import { RegisterUser } from "../api/user";
 
 const Register = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const onFinish = async (values) => {
     try {
-      dispatch(showLoading);
+      dispatch(showLoading());
       const response = await RegisterUser(values);
       if (response?.success) {
         message.success(response?.message);
         navigate("/login");
-      } else {
-        message.warning(response?.message);
       }
     } catch (error) {
       message.error(error);
-      console.log(error);
     } finally {
-      dispatch(hideLoading);
+      dispatch(hideLoading());
     }
   };
 
   useEffect(() => {
     if (localStorage.getItem("tokenForBMS")) {
-      navigate("/");
+      navigate("/", { replace: true });
     }
   }, []);
-
   return (
     <header className="App-header">
       <main className="main-area mw-500 text-center px-3">
@@ -89,7 +85,7 @@ const Register = () => {
             >
               <div className="d-flex justify-content-start">
                 <Radio.Group name="radiogroup" className="flex-start">
-                  <Radio value={"patner"}>Yes</Radio>
+                  <Radio value={"partner"}>Yes</Radio>
                   <Radio value={"user"}>No</Radio>
                 </Radio.Group>
               </div>
@@ -115,4 +111,5 @@ const Register = () => {
     </header>
   );
 };
+
 export default Register;

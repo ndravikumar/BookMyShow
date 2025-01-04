@@ -19,12 +19,12 @@ function Reset() {
       message.error(error.message);
     }
   };
+
   useEffect(() => {
     if (localStorage.getItem("tokenForBMS")) {
       navigate("/");
     }
   }, []);
-
   return (
     <>
       <header className="App-header">
@@ -47,6 +47,7 @@ function Reset() {
                   placeholder="Enter your otp"
                 ></Input>
               </Form.Item>
+
               <Form.Item
                 label="Password"
                 htmlFor="password"

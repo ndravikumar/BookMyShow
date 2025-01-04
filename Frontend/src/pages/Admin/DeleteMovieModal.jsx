@@ -11,6 +11,7 @@ const DeleteMovieModal = ({
   getData,
 }) => {
   const dispatch = useDispatch();
+
   const handleOk = async () => {
     try {
       dispatch(showLoading());
@@ -31,10 +32,12 @@ const DeleteMovieModal = ({
       message.error(err.message);
     }
   };
+
   const handleCancel = () => {
     setIsDeleteModalOpen(false);
     setSelectedMovie(null);
   };
+
   return (
     <Modal
       title="Delete Movie?"
@@ -44,9 +47,10 @@ const DeleteMovieModal = ({
     >
       <p className="pt-3 fs-18">Are you sure you want to delete this movie?</p>
       <p className="pb-3 fs-18">
-        This action can&apos;t be undone and you&apos;ll lose this movie data.
+        This action can't be undone and you'll lose this movie data.
       </p>
     </Modal>
   );
 };
+
 export default DeleteMovieModal;
