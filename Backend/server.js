@@ -7,6 +7,7 @@ const theatreRoute = require("./routes/theatreRoute");
 const showRoute = require("./routes/showRoute");
 const bookingRoute = require("./routes/bookingRoute");
 const app = express();
+const { swaggerUi, specs } = require("./config/swagger");
 const cors = require("cors");
 const { validateJWTToken } = require("./middleware/authorizationMiddleware");
 const rateLimit = require("express-rate-limit");
@@ -41,12 +42,19 @@ app.use(
 app.use(cors());
 app.use(express.json());
 app.use(mongoSanitize());
+
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
 app.use("/bms", apiLimiter);
 app.use("/bms/users", userRoute);
 app.use("/bms/movies", validateJWTToken, movieRoute);
 app.use("/bms/theatres", validateJWTToken, theatreRoute);
 app.use("/bms/shows", validateJWTToken, showRoute);
 app.use("/bms/bookings", validateJWTToken, bookingRoute);
+
+
+// Error handler middleware (should be last)
+const errorHandler = require("./middleware/errorHandler");
+app.use(errorHandler);
 
 app.listen(process.env.PORT, () => {
   console.log(`server is running on ${process.env.PORT}`);

@@ -49,10 +49,18 @@ const makePayment = async (req, res) => {
 
 const bookShow = async (req, res) => {
   try {
+    const show = await Show.findById(req.body.show).populate("movie");
+    // Check if any requested seat is already booked
+    const seatAlreadyBooked = req.body.seats.some((seat) => show.bookedSeats.includes(seat));
+    if (seatAlreadyBooked) {
+      return res.status(409).send({
+        success: false,
+        message: "One or more seats are already booked.",
+      });
+    }
+
     const newBooking = new Booking(req.body);
     await newBooking.save();
-
-    const show = await Show.findById(req.body.show).populate("movie");
 
     const updatedBookedSeats = [...show.bookedSeats, ...req.body.seats];
     await Show.findByIdAndUpdate(req.body.show, {
@@ -77,11 +85,14 @@ const bookShow = async (req, res) => {
         },
       });
 
+    // Format date using luxon
+    const { DateTime } = require("luxon");
+    const formattedDate = DateTime.fromJSDate(populatedBooking.show.date).toFormat("yyyy LLL dd");
     await EmailHelper("ticketTemplate.html", populatedBooking.user.email, {
       name: populatedBooking.user.name,
       movie: populatedBooking.show.movie.movieName,
       theatre: populatedBooking.show.theatre.name,
-      date: populatedBooking.show.date,
+      date: formattedDate,
       time: populatedBooking.show.time,
       seats: populatedBooking.seats,
       amount: populatedBooking.seats.length * populatedBooking.show.ticketPrice,
@@ -94,7 +105,7 @@ const bookShow = async (req, res) => {
       data: newBooking,
     });
   } catch (error) {
-    res.send({
+    res.status(500).send({
       success: false,
       message: error.message,
     });
@@ -211,11 +222,13 @@ const makePaymentAndBookShow = async (req, res) => {
       data: populatedBooking,
     });
 
+    const { DateTime } = require("luxon");
+    const formattedDate = DateTime.fromJSDate(populatedBooking.show.date).toFormat("yyyy LLL dd");
     await EmailHelper("ticketTemplate.html", populatedBooking.user.email, {
       name: populatedBooking.user.name,
       movie: populatedBooking.show.movie.movieName,
       theatre: populatedBooking.show.theatre.name,
-      date: populatedBooking.show.date,
+      date: formattedDate,
       time: populatedBooking.show.time,
       seats: populatedBooking.seats,
       amount: populatedBooking.seats.length * populatedBooking.show.ticketPrice,

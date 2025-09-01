@@ -14,77 +14,35 @@ import BookShow from "./components/BookShow";
 import Forget from "./components/Forget";
 import Reset from "./components/Reset";
 import { useSelector } from "react-redux";
+import { AlertProvider } from "./components/AlertProvider";
 
 function App() {
   const navigate = useNavigate();
-  const { loading } = useSelector((state) => {
-    return state.loader;
-  });
+  const { loading } = useSelector((state) => state.loader);
   useEffect(() => {
     setupAxiosInterceptors(navigate);
   }, [navigate]);
   return (
-    <>
+    <AlertProvider>
       {loading && (
         <div className="loader-container">
           <div className="loader"></div>
         </div>
       )}
       <Routes>
-        <Route
-          path="/"
-          element={
-            <ProtectedRoute>
-              <Home />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/profile"
-          element={
-            <ProtectedRoute>
-              <Profile />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/admin"
-          element={
-            <ProtectedRoute>
-              <Admin />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/partner"
-          element={
-            <ProtectedRoute>
-              <Partner />
-            </ProtectedRoute>
-          }
-        />
+        {/* ...existing routes... */}
+        <Route path="/" element={<ProtectedRoute><Home /></ProtectedRoute>} />
+        <Route path="/profile" element={<ProtectedRoute><Profile /></ProtectedRoute>} />
+        <Route path="/admin" element={<ProtectedRoute><Admin /></ProtectedRoute>} />
+        <Route path="/partner" element={<ProtectedRoute><Partner /></ProtectedRoute>} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route
-          path="/movie/:id"
-          element={
-            <ProtectedRoute>
-              <SingleMovie />
-            </ProtectedRoute>
-          }
-        />
-        <Route
-          path="/book-show/:id"
-          element={
-            <ProtectedRoute>
-              <BookShow />
-            </ProtectedRoute>
-          }
-        />
+        <Route path="/movie/:id" element={<ProtectedRoute><SingleMovie /></ProtectedRoute>} />
+        <Route path="/book-show/:id" element={<ProtectedRoute><BookShow /></ProtectedRoute>} />
         <Route path="/forget" element={<Forget />} />
         <Route path="/reset" element={<Reset />} />
       </Routes>
-    </>
+    </AlertProvider>
   );
 }
 
