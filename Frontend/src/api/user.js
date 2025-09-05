@@ -1,3 +1,11 @@
+export const LogoutUser = async () => {
+  try {
+    const response = await axiosInstance.post("/users/logout");
+    return response.data;
+  } catch (error) {
+    return error;
+  }
+};
 import { axiosInstance } from ".";
 
 export const RegisterUser = async (values) => {

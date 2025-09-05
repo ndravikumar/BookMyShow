@@ -22,15 +22,22 @@ const addMovie = async (req, res) => {
     });
   }
 };
+const mongoose = require("mongoose");
 const getAllMovies = async (req, res) => {
+  const session = await mongoose.startSession();
   try {
-    const allMovies = await MovieModel.find();
+    session.startTransaction({ readConcern: { level: "snapshot" } });
+    const allMovies = await MovieModel.find().session(session);
+    await session.commitTransaction();
+    session.endSession();
     res.send({
       success: true,
       message: "All movies has been fetched",
       data: allMovies,
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     res.send({
       success: false,
       message: error.message,
@@ -73,14 +80,20 @@ const deleteMovie = async (req, res) => {
 };
 
 const getMovieById = async (req, res) => {
+  const session = await mongoose.startSession();
   try {
-    const movie = await MovieModel.findById(req.params.id);
+    session.startTransaction({ readConcern: { level: "snapshot" } });
+    const movie = await MovieModel.findById(req.params.id).session(session);
+    await session.commitTransaction();
+    session.endSession();
     res.send({
       success: true,
       message: "Movie fetched successfully!",
       data: movie,
     });
   } catch (err) {
+    await session.abortTransaction();
+    session.endSession();
     res.send({
       success: false,
       message: err.message,

@@ -1,9 +1,3 @@
-# Pending Task
-
-## Class
-
-1. how can we avoid booking same ticket again & 2 people
-
 ## Masters
 
 1. Error Handler Middleware - specfic status codes

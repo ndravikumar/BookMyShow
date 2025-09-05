@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { hideLoading, showLoading } from "../redux/loaderSlice";
-import { GetCurrentUser } from "../api/user";
+import { GetCurrentUser, LogoutUser } from "../api/user";
 import { setUser } from "../redux/userSlice";
 import { Layout, Menu, message } from "antd";
 import { Header } from "antd/es/layout/layout";
@@ -43,7 +43,7 @@ const ProtectedRoute = ({ children }) => {
               onClick={() => {
                 if (user.role === "admin") {
                   navigate("/admin", { replace: true });
-                } else if (user.role === "partner") {
+                } else if (user.role === "patner") {
                   navigate("/partner", { replace: true });
                 } else {
                   navigate("/profile", { replace: true });
@@ -58,14 +58,16 @@ const ProtectedRoute = ({ children }) => {
         {
           key: "logout",
           label: (
-            <Link
-              to="/login"
-              onClick={() => {
-                localStorage.removeItem("tokenForBMS");
+            <span
+              style={{ cursor: "pointer" }}
+              onClick={async () => {
+                await LogoutUser();
+                dispatch(setUser(null));
+                navigate("/login");
               }}
             >
               Log out
-            </Link>
+            </span>
           ),
           icon: <LogoutOutlined />,
         },
@@ -86,11 +88,8 @@ const ProtectedRoute = ({ children }) => {
   };
 
   useEffect(() => {
-    if (localStorage.getItem("tokenForBMS")) {
-      getValidUser();
-    } else {
-      navigate("/login");
-    }
+    getValidUser();
+    // If not authenticated, GetCurrentUser will fail and user will be redirected by parent logic
   }, []);
   return (
     user && (

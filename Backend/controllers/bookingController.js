@@ -113,7 +113,9 @@ const bookShow = async (req, res) => {
 };
 
 const getAllBookings = async (req, res) => {
+  const session = await mongoose.startSession();
   try {
+    session.startTransaction({ readConcern: { level: "snapshot" } });
     const bookings = await Booking.find({ user: req.body.userId })
       .populate("user")
       .populate("show")
@@ -130,14 +132,19 @@ const getAllBookings = async (req, res) => {
           path: "theatre",
           model: "theatres",
         },
-      });
+      })
+      .session(session);
 
+    await session.commitTransaction();
+    session.endSession();
     res.send({
       success: true,
       message: "Bookings fetched!",
       data: bookings,
     });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     res.send({
       success: false,
       message: error.message,

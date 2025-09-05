@@ -1,36 +1,35 @@
 import React, { useEffect } from "react";
-import { Form, Input, Button, message } from "antd";
+import { Form, Input, Button } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import { LoginUser } from "../api/user";
+import { useContext } from "react";
+import AlertContext from "./AlertContext";
 import { useDispatch } from "react-redux";
 import { hideLoading, showLoading } from "../redux/loaderSlice";
 
 const Login = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { showAlert } = useContext(AlertContext);
   const onFinish = async (values) => {
     try {
       dispatch(showLoading());
       const response = await LoginUser(values);
       if (response?.success) {
-        message.success(response?.message);
-        localStorage.setItem("tokenForBMS", response?.data);
+        showAlert(response?.message, "success");
         navigate("/");
       } else if (response?.message === "Please enter valid password") {
-        // to do
-        message.error(response?.message);
+        showAlert(response?.message, "error");
       }
     } catch (error) {
-      message.error(error);
+  showAlert(error?.message || "Login failed", "error");
     } finally {
       dispatch(hideLoading());
     }
   };
 
   useEffect(() => {
-    if (localStorage.getItem("tokenForBMS")) {
-      navigate("/", { replace: true });
-    }
+    // No localStorage check needed, cookie-based auth
   }, []);
   return (
     <header className="App-header">

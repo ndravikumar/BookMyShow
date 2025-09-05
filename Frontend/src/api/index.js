@@ -1,10 +1,11 @@
 import axios from "axios";
 
 export const axiosInstance = axios.create({
-  baseURL: "/bms",
+  baseURL: import.meta.env.VITE_API_URL || "http://localhost:5000/bms",
   headers: {
     "Content-Type": "application/json",
   },
+  withCredentials: true,
 });
 
 axiosInstance.interceptors.request.use(

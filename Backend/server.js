@@ -10,6 +10,7 @@ const app = express();
 const { swaggerUi, specs } = require("./config/swagger");
 const cors = require("cors");
 const { validateJWTToken } = require("./middleware/authorizationMiddleware");
+const cookieParser = require("cookie-parser");
 const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
@@ -39,8 +40,12 @@ app.use(
   })
 );
 
-app.use(cors());
+app.use(cors({
+  origin: true,
+  credentials: true,
+}));
 app.use(express.json());
+app.use(cookieParser());
 app.use(mongoSanitize());
 
 app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));

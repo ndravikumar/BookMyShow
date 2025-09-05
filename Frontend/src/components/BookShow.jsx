@@ -4,7 +4,9 @@ import { useDispatch, useSelector } from "react-redux";
 import { hideLoading, showLoading } from "../redux/loaderSlice";
 import { getShowById } from "../api/show";
 import { useNavigate, useParams } from "react-router-dom";
-import { message, Card, Row, Col, Button } from "antd";
+import { Card, Row, Col, Button } from "antd";
+import { useContext } from "react";
+import AlertContext from "./AlertContext";
 import { DateTime } from "luxon";
 import StripeCheckout from "react-stripe-checkout";
 import { bookShow, makePayment, makePaymentAndBookShow } from "../api/booking";
@@ -16,6 +18,7 @@ const BookShow = () => {
   const [selectedSeats, setSelectedSeats] = useState([]);
   const { user } = useSelector((state) => state.user);
   const navigate = useNavigate();
+  const { showAlert } = useContext(AlertContext);
   const getData = async () => {
     try {
       dispatch(showLoading());
@@ -23,11 +26,11 @@ const BookShow = () => {
       if (response.success) {
         setShow(response.data);
       } else {
-        message.error(response.message);
+        showAlert(response.message, "error");
       }
       dispatch(hideLoading());
     } catch (err) {
-      message.error(err.message);
+      showAlert(err.message, "error");
       dispatch(hideLoading());
     }
   };
@@ -105,13 +108,13 @@ const BookShow = () => {
         user: user._id,
       });
       if (response.success) {
-        message.success("Show Booking done!");
+        showAlert("Show Booking done!", "success");
         navigate("/profile");
       } else {
-        message.error(response.message);
+        showAlert(response.message, "error");
       }
     } catch (err) {
-      message.error(err);
+      showAlert(err.message || "Booking failed", "error");
     } finally {
       dispatch(hideLoading());
     }

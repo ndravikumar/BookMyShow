@@ -2,6 +2,7 @@ const router = require("express").Router();
 const {
   registerUser,
   loginUser,
+  logoutUser,
   currentUser,
   forgetPassword,
   resetPassword,
@@ -11,6 +12,7 @@ const userModel = require("../models/userSchema");
 
 router.post("/register", registerUser);
 router.post("/login", loginUser);
+router.post("/logout", logoutUser);
 router.get("/getCurrentUser", validateJWTToken, currentUser);
 router.post("/forgetPassword", forgetPassword);
 router.post("/resetPassword", resetPassword);

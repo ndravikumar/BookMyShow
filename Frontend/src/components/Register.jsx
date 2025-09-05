@@ -1,32 +1,33 @@
 import React, { useEffect } from "react";
-import { Form, Input, Button, message, Radio } from "antd";
+import { Form, Input, Button, Radio } from "antd";
 import { Link, useNavigate } from "react-router-dom";
 import { RegisterUser } from "../api/user";
+import { useContext } from "react";
+import AlertContext from "./AlertContext";
 import { useDispatch } from "react-redux";
 import { hideLoading, showLoading } from "../redux/loaderSlice";
 
 const Register = () => {
   const navigate = useNavigate();
   const dispatch = useDispatch();
+  const { showAlert } = useContext(AlertContext);
   const onFinish = async (values) => {
     try {
       dispatch(showLoading());
       const response = await RegisterUser(values);
       if (response?.success) {
-        message.success(response?.message);
+        showAlert(response?.message, "success");
         navigate("/login");
       }
     } catch (error) {
-      message.error(error);
+  showAlert(error?.message || "Registration failed", "error");
     } finally {
       dispatch(hideLoading());
     }
   };
 
   useEffect(() => {
-    if (localStorage.getItem("tokenForBMS")) {
-      navigate("/", { replace: true });
-    }
+    // No localStorage check needed, cookie-based auth
   }, []);
   return (
     <header className="App-header">

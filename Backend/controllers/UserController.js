@@ -6,65 +6,70 @@ const EmailHelper = require("../utils/emailHelper");
 const registerUser = async (req, res) => {
   try {
     const userExists = await userModel.findOne({ email: req?.body?.email });
-
     if (userExists) {
-      return res.send({
-        success: false,
-        message: "User Already Exists",
-      });
+      const error = new Error("User Already Exists");
+      error.status = 409;
+      return next(error);
     }
-
     // hash the password
     const salt = await bcrypt.genSalt(10); // 2^10
     const hashPassword = await bcrypt.hash(req?.body?.password, salt);
     req.body.password = hashPassword;
     const newUser = new userModel(req?.body);
     await newUser.save();
-
     res.send({
       success: true,
       message: "Registration Successful, Please Login",
     });
   } catch (error) {
-    console.log(error);
+    error.status = 500;
+    next(error);
   }
 };
 
 const loginUser = async (req, res) => {
   try {
     const user = await userModel.findOne({ email: req?.body?.email });
-
     if (!user) {
-      res.send({
-        success: false,
-        message: "User doesn't exists, please register",
-      });
+      const error = new Error("User doesn't exist, please register");
+      error.status = 404;
+      return next(error);
     }
-
     const validatePassword = await bcrypt.compare(
       req?.body?.password,
       user.password
     );
-
     if (!validatePassword) {
-      res.send({
-        success: false,
-        message: "Invalid credentials",
-      });
+      const error = new Error("Invalid credentials");
+      error.status = 401;
+      return next(error);
     }
-
     const token = jwt.sign({ userId: user._id }, process.env.SECRET_KEY, {
       expiresIn: "1d",
     });
-
+    res.cookie("tokenForBMS", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      sameSite: "lax",
+      maxAge: 24 * 60 * 60 * 1000,
+    });
     res.send({
       success: true,
       message: "Welcome to BookMyShow",
-      data: token,
     });
   } catch (error) {
-    console.log(error);
+    error.status = 500;
+    next(error);
   }
+};
+
+// Logout controller to clear the cookie
+const logoutUser = async (req, res) => {
+  res.clearCookie("tokenForBMS");
+  res.send({
+    success: true,
+    message: "Logged out successfully",
+  });
 };
 
 const currentUser = async (req, res) => {
@@ -76,10 +81,8 @@ const currentUser = async (req, res) => {
       data: user,
     });
   } catch (error) {
-    res.send({
-      success: false,
-      message: error.message,
-    });
+    error.status = 500;
+    next(error);
   }
 };
 
@@ -87,22 +90,19 @@ const forgetPassword = async (req, res) => {
   try {
     const { email } = req.body;
     if (email === undefined) {
-      return res.status(401).json({
-        status: "failure",
-        message: "Please enter the email for forget Password",
-      });
+      const error = new Error("Please enter the email for forget Password");
+      error.status = 400;
+      return next(error);
     }
     let user = await userModel.findOne({ email: email });
     if (user === null) {
-      return res.status(404).json({
-        status: false,
-        message: "user not found",
-      });
+      const error = new Error("user not found");
+      error.status = 404;
+      return next(error);
     } else if (user?.otp != undefined && user.otp < Date.now()) {
-      return res.json({
-        success: false,
-        message: "Please use otp sent on mail",
-      });
+      const error = new Error("Please use otp sent on mail");
+      error.status = 400;
+      return next(error);
     }
     const otp = Math.floor(Math.random() * 10000 + 90000);
     user.otp = otp;
@@ -117,10 +117,8 @@ const forgetPassword = async (req, res) => {
       message: "otp has been sent",
     });
   } catch (error) {
-    res.send({
-      success: false,
-      message: error.message,
-    });
+    error.status = 500;
+    next(error);
   }
 };
 
@@ -128,24 +126,20 @@ const resetPassword = async (req, res) => {
   try {
     const { password, otp } = req.body;
     if (password == undefined || otp == undefined) {
-      return res.status(401).json({
-        success: false,
-        message: "invalid request",
-      });
+      const error = new Error("invalid request");
+      error.status = 400;
+      return next(error);
     }
     const user = await userModel.findOne({ otp: otp });
     if (user == null) {
-      return res.status(404).json({
-        success: false,
-        message: "user not found",
-      });
+      const error = new Error("user not found");
+      error.status = 404;
+      return next(error);
     }
-
     if (Date.now() > user.otpExpiry) {
-      return res.status(401).json({
-        success: false,
-        message: "otp expired",
-      });
+      const error = new Error("otp expired");
+      error.status = 401;
+      return next(error);
     }
     const salt = await bcrypt.genSalt(10);
     const hashPassword = await bcrypt.hash(req?.body?.password, salt);
@@ -158,16 +152,15 @@ const resetPassword = async (req, res) => {
       message: "password reset successfully",
     });
   } catch (error) {
-    res.send({
-      success: false,
-      message: error.message,
-    });
+    error.status = 500;
+    next(error);
   }
 };
 
 module.exports = {
   registerUser,
   loginUser,
+  logoutUser,
   currentUser,
   forgetPassword,
   resetPassword,
