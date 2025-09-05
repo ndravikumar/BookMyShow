@@ -6,7 +6,7 @@ import { getAllMovies } from "../../api/movie";
 import { EditOutlined, DeleteOutlined } from "@ant-design/icons";
 import MovieForm from "./MovieForm";
 import DeleteMovieModal from "./DeleteMovieModal";
-import moment from "moment";
+import { DateTime } from "luxon";
 
 const MovieList = () => {
   const [movies, SetMovies] = useState([]);
@@ -71,7 +71,7 @@ const MovieList = () => {
       title: "Release Date",
       dataIndex: "releaseDate",
       render: (text, data) => {
-        return moment(data.releaseDate).format("MM-DD-YYYY");
+        return DateTime.fromISO(data.releaseDate).toFormat("MM-dd-yyyy");
       },
     },
     {

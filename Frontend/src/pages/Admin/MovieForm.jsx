@@ -1,6 +1,5 @@
 import { Col, Modal, Row, Form, Input, Select, Button, message } from "antd";
-import React from "react";
-import moment from "moment";
+import { DateTime } from "luxon";
 import TextArea from "antd/es/input/TextArea";
 import { useDispatch } from "react-redux";
 import { hideLoading, showLoading } from "../../redux/loaderSlice";
@@ -17,9 +16,7 @@ const MovieForm = ({
   const dispatch = useDispatch();
 
   if (selectedMovie) {
-    selectedMovie.releaseDate = moment(selectedMovie.releaseDate).format(
-      "YYYY-MM-DD"
-    );
+    selectedMovie.releaseDate = DateTime.fromISO(selectedMovie.releaseDate).toFormat("yyyy-MM-dd");
   }
 
   const handleCancel = () => {

@@ -5,7 +5,7 @@ import { useNavigate } from "react-router-dom";
 import { SearchOutlined } from "@ant-design/icons";
 import { getAllMovies } from "../api/movie";
 import { useDispatch } from "react-redux";
-import moment from "moment";
+import { DateTime } from "luxon";
 
 const Home = () => {
   const [movies, setMovies] = useState(null);
@@ -79,9 +79,7 @@ const Home = () => {
                   <img
                     onClick={() => {
                       navigate(
-                        `/movie/${movie._id}?date=${moment().format(
-                          "YYYY-MM-DD"
-                        )}`
+                        `/movie/${movie._id}?date=${DateTime.now().toFormat("yyyy-MM-dd")}`
                       );
                     }}
                     className="cursor-pointer"
@@ -105,9 +103,7 @@ const Home = () => {
                   <h3
                     onClick={() => {
                       navigate(
-                        `/movie/${movie._id}?date=${moment().format(
-                          "YYYY-MM-DD"
-                        )}`
+                        `/movie/${movie._id}?date=${DateTime.now().toFormat("yyyy-MM-dd")}`
                       );
                     }}
                     className="cursor-pointer"

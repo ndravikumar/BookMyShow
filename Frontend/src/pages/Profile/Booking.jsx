@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 import { hideLoading, showLoading } from "../../redux/loaderSlice";
 import { getAllBookings } from "../../api/booking";
 import { useDispatch } from "react-redux";
-import moment from "moment";
+import { DateTime } from "luxon";
 import { Link } from "react-router-dom";
 
 const Booking = () => {
@@ -58,8 +58,8 @@ const Booking = () => {
                       <p>
                         Date & Time:
                         <b>
-                          {moment(booking.show.date).format("MMM Do YYYY")}
-                          {moment(booking.show.time, "HH:mm").format("hh:mm A")}
+                          {DateTime.fromISO(booking.show.date).toFormat("MMM dd yyyy")}
+                          {DateTime.fromFormat(booking.show.time, "HH:mm").toFormat("hh:mm a")}
                         </b>
                       </p>
                       <p>
@@ -82,7 +82,7 @@ const Booking = () => {
 
       {!bookings.length && (
         <div className="text-center pt-3">
-          <h1>You've not booked any show yet!</h1>
+          <h1>You&#39;ve not booked any show yet!</h1>
           <Link to="/">
             <Button type="primary">Start Booking</Button>
           </Link>

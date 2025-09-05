@@ -10,7 +10,7 @@ import {
   message,
 } from "antd";
 import React, { useState, useEffect } from "react";
-import moment from "moment";
+import { DateTime } from "luxon";
 import {
   addShow,
   deleteShow,
@@ -99,14 +99,14 @@ const ShowModal = ({
       title: "Show Date",
       dataIndex: "date",
       render: (text, data) => {
-        return moment(text).format("MMM Do YYYY");
+        return DateTime.fromISO(text).toFormat("MMM dd yyyy");
       },
     },
     {
       title: "Show Time",
       dataIndex: "time",
       render: (text, data) => {
-        return moment(text, "HH:mm").format("hh:mm A");
+        return DateTime.fromFormat(text, "HH:mm").toFormat("hh:mm a");
       },
     },
     {
@@ -144,7 +144,7 @@ const ShowModal = ({
                 setView("edit");
                 setSelectedShow({
                   ...data,
-                  date: moment(data.date).format("YYYY-MM-DD"),
+                  date: DateTime.fromISO(data.date).toFormat("yyyy-MM-dd"),
                   movie: data.movie._id,
                 });
               }}
