@@ -41,3 +41,5 @@ async function EmailHelper(templateName, receiverEmail, creds) {
     }
   }
 }
+
+module.exports = EmailHelper;

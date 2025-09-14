@@ -2,6 +2,7 @@ const Booking = require("../models/bookingSchema");
 const Show = require("../models/showSchema");
 const mongoose = require("mongoose");
 const stripe = require("stripe")(process.env.STRIPE_KEY);
+const EmailHelper = require("../utils/emailHelper");
 
 const makePayment = async (req, res) => {
   try {
@@ -51,7 +52,9 @@ const bookShow = async (req, res) => {
   try {
     const show = await Show.findById(req.body.show).populate("movie");
     // Check if any requested seat is already booked
-    const seatAlreadyBooked = req.body.seats.some((seat) => show.bookedSeats.includes(seat));
+    const seatAlreadyBooked = req.body.seats.some((seat) =>
+      show.bookedSeats.includes(seat)
+    );
     if (seatAlreadyBooked) {
       return res.status(409).send({
         success: false,
@@ -87,7 +90,9 @@ const bookShow = async (req, res) => {
 
     // Format date using luxon
     const { DateTime } = require("luxon");
-    const formattedDate = DateTime.fromJSDate(populatedBooking.show.date).toFormat("yyyy LLL dd");
+    const formattedDate = DateTime.fromJSDate(
+      populatedBooking.show.date
+    ).toFormat("yyyy LLL dd");
     await EmailHelper("ticketTemplate.html", populatedBooking.user.email, {
       name: populatedBooking.user.name,
       movie: populatedBooking.show.movie.movieName,
@@ -223,14 +228,16 @@ const makePaymentAndBookShow = async (req, res) => {
     await session.commitTransaction();
     session.endSession();
 
-    res.send({
+    res.status(200).json({
       success: true,
       message: "Payment and Booking successful!",
       data: populatedBooking,
     });
 
     const { DateTime } = require("luxon");
-    const formattedDate = DateTime.fromJSDate(populatedBooking.show.date).toFormat("yyyy LLL dd");
+    const formattedDate = DateTime.fromJSDate(
+      populatedBooking.show.date
+    ).toFormat("yyyy LLL dd");
     await EmailHelper("ticketTemplate.html", populatedBooking.user.email, {
       name: populatedBooking.user.name,
       movie: populatedBooking.show.movie.movieName,
@@ -245,13 +252,13 @@ const makePaymentAndBookShow = async (req, res) => {
     await session.abortTransaction();
     session.endSession();
 
-    if (err.message.includes("One or more seats are already booked.")) {
+    if (error.message.includes("One or more seats are already booked.")) {
       // start the refund process;
       // await stripe.refunds.create({ payment_intent: paymentIntent.id });
     }
-    res.send({
+    res.status(500).json({
       success: false,
-      message: err.message,
+      message: error.message,
     });
   }
 };

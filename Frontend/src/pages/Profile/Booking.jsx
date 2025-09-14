@@ -42,34 +42,34 @@ const Booking = () => {
                   <div className="d-flex flex-column-mob">
                     <div className="flex-shrink-0">
                       <img
-                        src={booking.show.movie.poster}
+                        src={booking?.show?.movie?.poster}
                         width={100}
                         alt="Movie Poster"
                       />
                     </div>
                     <div className="show-details flex-1">
-                      <h3 className="mt-0 mb-0">{booking.show.movie.title}</h3>
+                      <h3 className="mt-0 mb-0">{booking?.show?.movie?.title}</h3>
                       <p>
-                        Theatre: <b>{booking.show.theatre.name}</b>
+                        Theatre: <b>{booking?.show?.theatre?.name}</b>
                       </p>
                       <p>
-                        Seats: <b>{booking.seats.join(", ")}</b>
+                        Seats: <b>{booking?.seats?.join(", ")}</b>
                       </p>
                       <p>
                         Date & Time:
                         <b>
-                          {DateTime.fromISO(booking.show.date).toFormat("MMM dd yyyy")}
-                          {DateTime.fromFormat(booking.show.time, "HH:mm").toFormat("hh:mm a")}
+                          {DateTime.fromISO(booking?.show?.date).toFormat("MMM dd yyyy")}
+                          {DateTime.fromFormat(booking?.show?.time, "HH:mm")?.toFormat("hh:mm a")}
                         </b>
                       </p>
                       <p>
                         Amount:
                         <b>
-                          Rs.{booking.seats.length * booking.show.ticketPrice}
+                          Rs.{booking?.seats?.length * booking?.show?.ticketPrice}
                         </b>
                       </p>
                       <p>
-                        Booking ID: <b>{booking.transactionId} </b>
+                        Booking ID: <b>{booking?.transactionId} </b>
                       </p>
                     </div>
                   </div>
@@ -80,7 +80,7 @@ const Booking = () => {
         </Row>
       )}
 
-      {!bookings.length && (
+      {!bookings?.length && (
         <div className="text-center pt-3">
           <h1>You&#39;ve not booked any show yet!</h1>
           <Link to="/">
