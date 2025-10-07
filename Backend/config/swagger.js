@@ -1,17 +1,23 @@
-const swaggerJsdoc = require('swagger-jsdoc');
-const swaggerUi = require('swagger-ui-express');
+const swaggerJSDoc = require("swagger-jsdoc");
+const swaggerUi = require("swagger-ui-express");
 
 const options = {
   definition: {
-    openapi: '3.0.0',
+    openapi: "3.0.0",
     info: {
-      title: 'BookMyShow API',
-      version: '1.0.0',
+      title: "BookMyShow API",
+      version: "1.0.0",
+      description: "API documentation for BookMyShow backend",
     },
+    servers: [
+      {
+        url: "http://localhost:5000", // change if needed
+      },
+    ],
   },
-  apis: ['./routes/*.js'],
+  apis: ["./routes/*.js"], // path to your route files
 };
 
-const specs = swaggerJsdoc(options);
+const swaggerSpec = swaggerJSDoc(options);
 
-module.exports = { swaggerUi, specs };
+module.exports = { swaggerUi, swaggerSpec };

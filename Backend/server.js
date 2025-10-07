@@ -6,8 +6,8 @@ const movieRoute = require("./routes/movieRoute");
 const theatreRoute = require("./routes/theatreRoute");
 const showRoute = require("./routes/showRoute");
 const bookingRoute = require("./routes/bookingRoute");
+const { swaggerUi, swaggerSpec } = require("./config/swagger");
 const app = express();
-const { swaggerUi, specs } = require("./config/swagger");
 const cors = require("cors");
 const { validateJWTToken } = require("./middleware/authorizationMiddleware");
 const cookieParser = require("cookie-parser");
@@ -48,7 +48,7 @@ app.use(express.json());
 app.use(cookieParser());
 app.use(mongoSanitize());
 
-app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(specs));
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use("/bms", apiLimiter);
 app.use("/bms/users", userRoute);
 app.use("/bms/movies", validateJWTToken, movieRoute);
@@ -63,4 +63,5 @@ app.use(errorHandler);
 
 app.listen(process.env.PORT, () => {
   console.log(`server is running on ${process.env.PORT}`);
+  console.log("Swagger Docs: http://localhost:8000/api-docs");
 });
