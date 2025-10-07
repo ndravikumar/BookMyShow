@@ -4,7 +4,7 @@ const swaggerDef = require("./swagger.json");
 
 const options = {
   definition: swaggerDef,
-  apis: ["./routes/*.js"], // path to your route files
+  apis: [], // Since we're using a JSON file instead of JSDoc comments
 };
 
 const swaggerSpec = swaggerJSDoc(options);

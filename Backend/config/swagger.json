@@ -11,7 +11,7 @@
   },
   "servers": [
     {
-      "url": "http://localhost:5173/bms",
+      "url": "http://localhost:8000/bms",
       "description": "Development server"
     }
   ],
@@ -26,7 +26,11 @@
     },
     {
       "name": "Theatre",
-      "description": "API for theatre and showtime information"
+      "description": "API for theatre management"
+    },
+    {
+      "name": "Show",
+      "description": "API for show and showtime information"
     },
     {
       "name": "Booking",
@@ -43,14 +47,50 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/User"
+                "type": "object",
+                "required": ["name", "email", "password"],
+                "properties": {
+                  "name": {
+                    "type": "string",
+                    "example": "John Doe"
+                  },
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "john@example.com"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 6,
+                    "example": "password123"
+                  },
+                  "role": {
+                    "type": "string",
+                    "enum": ["admin", "user", "partner"],
+                    "default": "user",
+                    "example": "user"
+                  }
+                }
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "User registered successfully"
+            "description": "User registered successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request - validation errors"
+          },
+          "409": {
+            "description": "User already exists"
           }
         }
       }
@@ -58,19 +98,23 @@
     "/users/login": {
       "post": {
         "tags": ["User"],
-        "summary": "Logs user into the system",
+        "summary": "Login user",
         "requestBody": {
           "required": true,
           "content": {
             "application/json": {
               "schema": {
                 "type": "object",
+                "required": ["email", "password"],
                 "properties": {
                   "email": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "email",
+                    "example": "john@example.com"
                   },
                   "password": {
-                    "type": "string"
+                    "type": "string",
+                    "example": "password123"
                   }
                 }
               }
@@ -79,19 +123,160 @@
         },
         "responses": {
           "200": {
-            "description": "Successful login",
+            "description": "Login successful",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "properties": {
-                    "token": {
-                      "type": "string"
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Invalid credentials"
+          }
+        }
+      }
+    },
+    "/users/logout": {
+      "post": {
+        "tags": ["User"],
+        "summary": "Logout user",
+        "responses": {
+          "200": {
+            "description": "Logout successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/users/getCurrentUser": {
+      "get": {
+        "tags": ["User"],
+        "summary": "Get current user information",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current user information",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/User"
+                        }
+                      }
                     }
+                  ]
+                }
+              }
+            }
+          },
+          "401": {
+            "description": "Unauthorized"
+          }
+        }
+      }
+    },
+    "/users/forgetPassword": {
+      "post": {
+        "tags": ["User"],
+        "summary": "Request password reset",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email"],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "john@example.com"
                   }
                 }
               }
             }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "OTP sent to email",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "User not found"
+          }
+        }
+      }
+    },
+    "/users/resetPassword": {
+      "post": {
+        "tags": ["User"],
+        "summary": "Reset password with OTP",
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["email", "otp", "password"],
+                "properties": {
+                  "email": {
+                    "type": "string",
+                    "format": "email",
+                    "example": "john@example.com"
+                  },
+                  "otp": {
+                    "type": "string",
+                    "example": "123456"
+                  },
+                  "password": {
+                    "type": "string",
+                    "minLength": 6,
+                    "example": "newpassword123"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Password reset successful",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Invalid or expired OTP"
           }
         }
       }
@@ -99,36 +284,62 @@
     "/movies/getAllMovies": {
       "get": {
         "tags": ["Movie"],
-        "summary": "Get a list of all movies",
+        "summary": "Get all movies",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "responses": {
           "200": {
-            "description": "A list of movies",
+            "description": "List of all movies",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Movie"
-                  }
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Movie"
+                          }
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }
+          },
+          "401": {
+            "description": "Unauthorized"
           }
         }
       }
     },
-    "/movies/{movieId}": {
+    "/movies/movie/{id}": {
       "get": {
         "tags": ["Movie"],
-        "summary": "Get movie details by ID",
+        "summary": "Get movie by ID",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
-            "name": "movieId",
+            "name": "id",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer"
-            }
+              "type": "string"
+            },
+            "description": "Movie ID"
           }
         ],
         "responses": {
@@ -137,7 +348,183 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Movie"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "$ref": "#/components/schemas/Movie"
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Movie not found"
+          }
+        }
+      }
+    },
+    "/movies/addMovie": {
+      "post": {
+        "tags": ["Movie"],
+        "summary": "Add a new movie",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MovieInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Movie added successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "400": {
+            "description": "Bad request"
+          }
+        }
+      }
+    },
+    "/movies/updateMovie": {
+      "patch": {
+        "tags": ["Movie"],
+        "summary": "Update a movie",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/MovieInput"
+                  },
+                  {
+                    "type": "object",
+                    "required": ["movieId"],
+                    "properties": {
+                      "movieId": {
+                        "type": "string",
+                        "description": "Movie ID to update"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Movie updated successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Movie not found"
+          }
+        }
+      }
+    },
+    "/movies/deleteMovie/{movieId}": {
+      "delete": {
+        "tags": ["Movie"],
+        "summary": "Delete a movie",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "movieId",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string"
+            },
+            "description": "Movie ID to delete"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Movie deleted successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Movie not found"
+          }
+        }
+      }
+    },
+    "/theatres/getAllTheatres": {
+      "get": {
+        "tags": ["Theatre"],
+        "summary": "Get all theatres",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of all theatres",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Theatre"
+                          }
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }
@@ -145,13 +532,128 @@
         }
       }
     },
-    "/theatres/city/{city}": {
+    "/theatres/getAllTheatresByOwner": {
       "get": {
         "tags": ["Theatre"],
-        "summary": "Get theatres by city",
+        "summary": "Get theatres by owner",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of theatres owned by current user",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Theatre"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/theatres/addTheatre": {
+      "post": {
+        "tags": ["Theatre"],
+        "summary": "Add a new theatre",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/TheatreInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Theatre added successfully",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ApiResponse"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/theatres/updateTheatre": {
+      "patch": {
+        "tags": ["Theatre"],
+        "summary": "Update a theatre",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/TheatreInput"
+                  },
+                  {
+                    "type": "object",
+                    "required": ["theatreId"],
+                    "properties": {
+                      "theatreId": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Theatre updated successfully"
+          }
+        }
+      }
+    },
+    "/theatres/deleteTheatre/{theatreId}": {
+      "delete": {
+        "tags": ["Theatre"],
+        "summary": "Delete a theatre",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
         "parameters": [
           {
-            "name": "city",
+            "name": "theatreId",
             "in": "path",
             "required": true,
             "schema": {
@@ -161,56 +663,15 @@
         ],
         "responses": {
           "200": {
-            "description": "A list of theatres in the city",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Theatre"
-                  }
-                }
-              }
-            }
+            "description": "Theatre deleted successfully"
           }
         }
       }
     },
-    "/theatres/{theatreId}/shows": {
-      "get": {
-        "tags": ["Theatre"],
-        "summary": "Get shows for a specific theatre",
-        "parameters": [
-          {
-            "name": "theatreId",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "integer"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "A list of shows for the theatre",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Show"
-                  }
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/bookings": {
+    "/shows/addShow": {
       "post": {
-        "tags": ["Booking"],
-        "summary": "Create a new booking",
+        "tags": ["Show"],
+        "summary": "Add a new show",
         "security": [
           {
             "bearerAuth": []
@@ -221,22 +682,61 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Booking"
+                "$ref": "#/components/schemas/ShowInput"
               }
             }
           }
         },
         "responses": {
           "201": {
-            "description": "Booking created successfully"
+            "description": "Show added successfully"
           }
         }
       }
     },
-    "/bookings/user/{userId}": {
-      "get": {
-        "tags": ["Booking"],
-        "summary": "Get all bookings for a user",
+    "/shows/updateShow": {
+      "patch": {
+        "tags": ["Show"],
+        "summary": "Update a show",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/ShowInput"
+                  },
+                  {
+                    "type": "object",
+                    "required": ["showId"],
+                    "properties": {
+                      "showId": {
+                        "type": "string"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Show updated successfully"
+          }
+        }
+      }
+    },
+    "/shows/deleteShow/{showId}": {
+      "delete": {
+        "tags": ["Show"],
+        "summary": "Delete a show",
         "security": [
           {
             "bearerAuth": []
@@ -244,24 +744,272 @@
         ],
         "parameters": [
           {
-            "name": "userId",
+            "name": "showId",
             "in": "path",
             "required": true,
             "schema": {
-              "type": "integer"
+              "type": "string"
             }
           }
         ],
         "responses": {
           "200": {
-            "description": "A list of user's bookings",
+            "description": "Show deleted successfully"
+          }
+        }
+      }
+    },
+    "/shows/getAllShowsByTheatre": {
+      "post": {
+        "tags": ["Show"],
+        "summary": "Get shows by theatre",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["theatreId"],
+                "properties": {
+                  "theatreId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of shows for the theatre",
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/Booking"
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Show"
+                          }
+                        }
+                      }
+                    }
+                  ]
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/shows/getAllTheatersByMovie": {
+      "post": {
+        "tags": ["Show"],
+        "summary": "Get theatres showing a specific movie",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["movie", "date"],
+                "properties": {
+                  "movie": {
+                    "type": "string"
+                  },
+                  "date": {
+                    "type": "string",
+                    "format": "date"
                   }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "List of theatres showing the movie"
+          }
+        }
+      }
+    },
+    "/shows/getShowById": {
+      "post": {
+        "tags": ["Show"],
+        "summary": "Get show by ID",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["showId"],
+                "properties": {
+                  "showId": {
+                    "type": "string"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Show details"
+          }
+        }
+      }
+    },
+    "/bookings/makePayment": {
+      "post": {
+        "tags": ["Booking"],
+        "summary": "Process payment for booking",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": ["amount"],
+                "properties": {
+                  "amount": {
+                    "type": "number",
+                    "description": "Payment amount in cents"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Payment processed successfully"
+          }
+        }
+      }
+    },
+    "/bookings/bookShow": {
+      "post": {
+        "tags": ["Booking"],
+        "summary": "Book a show",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/BookingInput"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Show booked successfully"
+          }
+        }
+      }
+    },
+    "/bookings/makePaymentAndBookShow": {
+      "post": {
+        "tags": ["Booking"],
+        "summary": "Process payment and book show in one transaction",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "allOf": [
+                  {
+                    "$ref": "#/components/schemas/BookingInput"
+                  },
+                  {
+                    "type": "object",
+                    "properties": {
+                      "token": {
+                        "type": "string",
+                        "description": "Payment token"
+                      }
+                    }
+                  }
+                ]
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Payment processed and show booked successfully"
+          }
+        }
+      }
+    },
+    "/bookings/getAllBookings": {
+      "get": {
+        "tags": ["Booking"],
+        "summary": "Get all bookings for current user",
+        "security": [
+          {
+            "bearerAuth": []
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "List of user's bookings",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "allOf": [
+                    {
+                      "$ref": "#/components/schemas/ApiResponse"
+                    },
+                    {
+                      "type": "object",
+                      "properties": {
+                        "data": {
+                          "type": "array",
+                          "items": {
+                            "$ref": "#/components/schemas/Booking"
+                          }
+                        }
+                      }
+                    }
+                  ]
                 }
               }
             }
@@ -272,113 +1020,337 @@
   },
   "components": {
     "schemas": {
+      "ApiResponse": {
+        "type": "object",
+        "properties": {
+          "success": {
+            "type": "boolean"
+          },
+          "message": {
+            "type": "string"
+          },
+          "data": {
+            "type": "object"
+          }
+        }
+      },
       "User": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer"
+          "_id": {
+            "type": "string",
+            "description": "MongoDB ObjectId"
           },
           "name": {
-            "type": "string"
+            "type": "string",
+            "example": "John Doe"
           },
           "email": {
-            "type": "string"
+            "type": "string",
+            "format": "email",
+            "example": "john@example.com"
           },
-          "password": {
-            "type": "string"
+          "role": {
+            "type": "string",
+            "enum": ["admin", "user", "partner"],
+            "example": "user"
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
           }
         }
       },
       "Movie": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer"
+          "_id": {
+            "type": "string",
+            "description": "MongoDB ObjectId"
           },
-          "title": {
-            "type": "string"
+          "movieName": {
+            "type": "string",
+            "example": "Avengers: Endgame"
           },
           "description": {
-            "type": "string"
+            "type": "string",
+            "example": "The epic conclusion to the Infinity Saga"
+          },
+          "duration": {
+            "type": "number",
+            "description": "Duration in minutes",
+            "example": 181
+          },
+          "genre": {
+            "type": "string",
+            "example": "Action"
+          },
+          "language": {
+            "type": "string",
+            "example": "English"
           },
           "releaseDate": {
             "type": "string",
-            "format": "date"
+            "format": "date",
+            "example": "2019-04-26"
           },
-          "genre": {
-            "type": "string"
+          "poster": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://example.com/poster.jpg"
+          }
+        }
+      },
+      "MovieInput": {
+        "type": "object",
+        "required": ["movieName", "description", "duration", "genre", "language", "releaseDate", "poster"],
+        "properties": {
+          "movieName": {
+            "type": "string",
+            "example": "Avengers: Endgame"
+          },
+          "description": {
+            "type": "string",
+            "example": "The epic conclusion to the Infinity Saga"
           },
           "duration": {
-            "type": "integer"
+            "type": "number",
+            "description": "Duration in minutes",
+            "example": 181
+          },
+          "genre": {
+            "type": "string",
+            "example": "Action"
+          },
+          "language": {
+            "type": "string",
+            "example": "English"
+          },
+          "releaseDate": {
+            "type": "string",
+            "format": "date",
+            "example": "2019-04-26"
+          },
+          "poster": {
+            "type": "string",
+            "format": "uri",
+            "example": "https://example.com/poster.jpg"
           }
         }
       },
       "Theatre": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer"
+          "_id": {
+            "type": "string",
+            "description": "MongoDB ObjectId"
           },
           "name": {
-            "type": "string"
-          },
-          "city": {
-            "type": "string"
+            "type": "string",
+            "example": "PVR Cinemas"
           },
           "address": {
-            "type": "string"
+            "type": "string",
+            "example": "123 Main Street, City"
+          },
+          "phone": {
+            "type": "number",
+            "example": 1234567890
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "theatre@example.com"
+          },
+          "owner": {
+            "type": "string",
+            "description": "Owner user ID (ObjectId)"
+          },
+          "isActive": {
+            "type": "boolean",
+            "default": false
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "TheatreInput": {
+        "type": "object",
+        "required": ["name", "address", "phone", "email"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "PVR Cinemas"
+          },
+          "address": {
+            "type": "string",
+            "example": "123 Main Street, City"
+          },
+          "phone": {
+            "type": "number",
+            "example": 1234567890
+          },
+          "email": {
+            "type": "string",
+            "format": "email",
+            "example": "theatre@example.com"
           }
         }
       },
       "Show": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer"
+          "_id": {
+            "type": "string",
+            "description": "MongoDB ObjectId"
           },
-          "movieId": {
-            "type": "integer"
+          "name": {
+            "type": "string",
+            "example": "Evening Show"
           },
-          "theatreId": {
-            "type": "integer"
+          "date": {
+            "type": "string",
+            "format": "date",
+            "example": "2024-01-15"
           },
-          "startTime": {
+          "time": {
+            "type": "string",
+            "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$",
+            "example": "18:30"
+          },
+          "movie": {
+            "type": "string",
+            "description": "Movie ID (ObjectId)"
+          },
+          "ticketPrice": {
+            "type": "number",
+            "example": 250
+          },
+          "totalSeats": {
+            "type": "number",
+            "example": 100
+          },
+          "bookedSeats": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": ["A1", "A2", "B1"]
+          },
+          "theatre": {
+            "type": "string",
+            "description": "Theatre ID (ObjectId)"
+          },
+          "createdAt": {
             "type": "string",
             "format": "date-time"
           },
-          "endTime": {
+          "updatedAt": {
             "type": "string",
             "format": "date-time"
+          }
+        }
+      },
+      "ShowInput": {
+        "type": "object",
+        "required": ["name", "date", "time", "movie", "ticketPrice", "totalSeats", "theatre"],
+        "properties": {
+          "name": {
+            "type": "string",
+            "example": "Evening Show"
           },
-          "price": {
-            "type": "number"
+          "date": {
+            "type": "string",
+            "format": "date",
+            "example": "2024-01-15"
+          },
+          "time": {
+            "type": "string",
+            "pattern": "^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$",
+            "example": "18:30"
+          },
+          "movie": {
+            "type": "string",
+            "description": "Movie ID (ObjectId)"
+          },
+          "ticketPrice": {
+            "type": "number",
+            "example": 250
+          },
+          "totalSeats": {
+            "type": "number",
+            "example": 100
+          },
+          "theatre": {
+            "type": "string",
+            "description": "Theatre ID (ObjectId)"
           }
         }
       },
       "Booking": {
         "type": "object",
         "properties": {
-          "id": {
-            "type": "integer"
+          "_id": {
+            "type": "string",
+            "description": "MongoDB ObjectId"
           },
-          "userId": {
-            "type": "integer"
+          "show": {
+            "type": "string",
+            "description": "Show ID (ObjectId)"
           },
-          "showId": {
-            "type": "integer"
+          "user": {
+            "type": "string",
+            "description": "User ID (ObjectId)"
           },
           "seats": {
             "type": "array",
             "items": {
               "type": "string"
-            }
+            },
+            "example": ["A1", "A2"]
           },
-          "totalPrice": {
-            "type": "number"
+          "transactionId": {
+            "type": "string",
+            "example": "txn_1234567890"
           },
-          "bookingTime": {
+          "createdAt": {
             "type": "string",
             "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "BookingInput": {
+        "type": "object",
+        "required": ["show", "seats", "transactionId"],
+        "properties": {
+          "show": {
+            "type": "string",
+            "description": "Show ID (ObjectId)"
+          },
+          "seats": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            },
+            "example": ["A1", "A2"]
+          },
+          "transactionId": {
+            "type": "string",
+            "example": "txn_1234567890"
           }
         }
       }
@@ -387,7 +1359,8 @@
       "bearerAuth": {
         "type": "http",
         "scheme": "bearer",
-        "bearerFormat": "JWT"
+        "bearerFormat": "JWT",
+        "description": "Enter JWT token"
       }
     }
   }
