@@ -80,7 +80,7 @@ const ProtectedRoute = ({ children }) => {
       dispatch(showLoading());
       const response = await GetCurrentUser();
       dispatch(setUser(response?.data));
-      if (response.status !== 200) {
+      if (response.status !== 200 && !response?.success) {
         navigate("/login");
       }
     } catch (error) {

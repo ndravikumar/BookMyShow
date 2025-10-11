@@ -27,7 +27,7 @@ const registerUser = async (req, res) => {
   }
 };
 
-const loginUser = async (req, res) => {
+const loginUser = async (req, res, next) => {
   try {
     const user = await userModel.findOne({ email: req?.body?.email });
     if (!user) {
