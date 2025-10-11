@@ -3,7 +3,7 @@ const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const EmailHelper = require("../utils/emailHelper");
 
-const registerUser = async (req, res) => {
+const registerUser = async (req, res, next) => {
   try {
     const userExists = await userModel.findOne({ email: req?.body?.email });
     if (userExists) {
@@ -72,7 +72,7 @@ const logoutUser = async (req, res) => {
   });
 };
 
-const currentUser = async (req, res) => {
+const currentUser = async (req, res, next) => {
   try {
     const user = await userModel.findById(req.body.userId).select("-password");
     res.send({
@@ -86,7 +86,7 @@ const currentUser = async (req, res) => {
   }
 };
 
-const forgetPassword = async (req, res) => {
+const forgetPassword = async (req, res, next) => {
   try {
     const { email } = req.body;
     if (email === undefined) {
@@ -122,7 +122,7 @@ const forgetPassword = async (req, res) => {
   }
 };
 
-const resetPassword = async (req, res) => {
+const resetPassword = async (req, res, next) => {
   try {
     const { password, otp } = req.body;
     if (password == undefined || otp == undefined) {
