@@ -15,7 +15,6 @@ const rateLimit = require("express-rate-limit");
 const helmet = require("helmet");
 const mongoSanitize = require("express-mongo-sanitize");
 
-
 connectDB();
 
 const apiLimiter = rateLimit({
@@ -32,7 +31,10 @@ app.use(
       scriptSrc: ["'self'", "example.com"], // Allow scripts from 'self' and example.com
       styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles (unsafe)
       imgSrc: ["'self'", "data:", "example.com"], // Allow images from 'self', data URLs, and example.com
-      connectSrc: ["'self'", "api.example.com"], // Allow connections to 'self' and api.example.com
+      connectSrc: [
+        "'self'",
+        "https://book-my-show-git-main-ndravikumars-projects.vercel.app", // <-- ADD THIS LINE
+      ], // Allow connections to 'self' and api.example.com
       fontSrc: ["'self'", "fonts.gstatic.com"], // Allow fonts from 'self' and fonts.gstatic.com
       objectSrc: ["'none'"], // Disallow object, embed, and applet elements
       upgradeInsecureRequests: [], // Upgrade insecure requests to HTTPS
@@ -40,10 +42,12 @@ app.use(
   })
 );
 
-app.use(cors({
-  origin: true,
-  credentials: true,
-}));
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
 app.use(express.json());
 app.use(cookieParser());
 app.use(mongoSanitize());
@@ -55,7 +59,6 @@ app.use("/bms/movies", validateJWTToken, movieRoute);
 app.use("/bms/theatres", validateJWTToken, theatreRoute);
 app.use("/bms/shows", validateJWTToken, showRoute);
 app.use("/bms/bookings", validateJWTToken, bookingRoute);
-
 
 // Error handler middleware (should be last)
 const errorHandler = require("./middleware/errorHandler");
