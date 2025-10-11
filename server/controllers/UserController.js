@@ -49,10 +49,11 @@ const loginUser = async (req, res, next) => {
     });
     res.cookie("tokenForBMS", token, {
       httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
+      secure: true, // Render uses HTTPS
+      sameSite: "none", // Required for cross-site cookies
       maxAge: 24 * 60 * 60 * 1000,
     });
+
     res.send({
       success: true,
       message: "Welcome to BookMyShow",
