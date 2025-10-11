@@ -27,24 +27,40 @@ app.use(helmet());
 app.use(
   helmet.contentSecurityPolicy({
     directives: {
-      defaultSrc: ["'self"],
-      scriptSrc: ["'self'", "example.com"], // Allow scripts from 'self' and example.com
-      styleSrc: ["'self'", "'unsafe-inline'"], // Allow inline styles (unsafe)
-      imgSrc: ["'self'", "data:", "example.com"], // Allow images from 'self', data URLs, and example.com
+      defaultSrc: ["'self'"],
+      scriptSrc: ["'self'"],
+      styleSrc: ["'self'", "'unsafe-inline'"],
+      imgSrc: ["'self'", "data:"],
       connectSrc: [
         "'self'",
-        "https://book-my-show-git-main-ndravikumars-projects.vercel.app", // <-- ADD THIS LINE
-      ], // Allow connections to 'self' and api.example.com
-      fontSrc: ["'self'", "fonts.gstatic.com"], // Allow fonts from 'self' and fonts.gstatic.com
-      objectSrc: ["'none'"], // Disallow object, embed, and applet elements
-      upgradeInsecureRequests: [], // Upgrade insecure requests to HTTPS
+        "https://book-my-show-git-main-ndravikumars-projects.vercel.app",
+        "https://bookmyshow-backend-h7pc.onrender.com",
+      ],
+      fontSrc: ["'self'", "fonts.gstatic.com"],
+      objectSrc: ["'none'"],
+      upgradeInsecureRequests: [],
     },
   })
 );
 
+const allowedOrigins = [
+  "http://localhost:5173", // Your local frontend for development
+  "https://book-my-show-git-main-ndravikumars-projects.vercel.app", // Your deployed Vercel frontend
+];
+
 app.use(
   cors({
-    origin: true,
+    origin: function (origin, callback) {
+      // Allow requests with no origin (like mobile apps or curl requests)
+      if (!origin) return callback(null, true);
+
+      if (allowedOrigins.indexOf(origin) === -1) {
+        const msg =
+          "The CORS policy for this site does not allow access from the specified Origin.";
+        return callback(new Error(msg), false);
+      }
+      return callback(null, true);
+    },
     credentials: true,
   })
 );
