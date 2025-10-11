@@ -43,7 +43,7 @@ const ProtectedRoute = ({ children }) => {
               onClick={() => {
                 if (user.role === "admin") {
                   navigate("/admin", { replace: true });
-                } else if (user.role === "patner") {
+                } else if (user.role === "partner") {
                   navigate("/partner", { replace: true });
                 } else {
                   navigate("/profile", { replace: true });

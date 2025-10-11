@@ -22,7 +22,7 @@ const Login = () => {
         showAlert(response?.message, "error");
       }
     } catch (error) {
-  showAlert(error?.message || "Login failed", "error");
+      showAlert(error?.message || "Login failed", "error");
     } finally {
       dispatch(hideLoading());
     }
