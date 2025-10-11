@@ -1,16 +1,8 @@
-const nodemailer = require("nodemailer");
+const sgMail = require("@sendgrid/mail");
 const fs = require("fs");
 const path = require("path");
 
-const transport = nodemailer.createTransport({
-  service: "gmail",
-  port: 587,
-  secure: false,
-  auth: {
-    user: process.env.GMAIL_USER,
-    pass: process.env.APP_PASSWORD,
-  },
-});
+sgMail.setApiKey(process.env.SENDGRID_API_KEY);
 
 function replaceContent(content, creds) {
   return Object.keys(creds).reduce((updatedContent, key) => {
@@ -23,22 +15,18 @@ async function EmailHelper(templateName, receiverEmail, creds) {
     const templatePath = path.join(__dirname, "email_templates", templateName);
     let content = await fs.promises.readFile(templatePath, "utf-8");
     content = replaceContent(content, creds);
-    const emailDetails = {
+
+    const msg = {
       to: receiverEmail,
-      from: process.env.GMAIL_USER,
+      from: process.env.SENDGRID_SENDER,
       subject: "Mail from Scaler BookMyShow",
       html: content,
     };
-    await transport.sendMail(emailDetails);
-    console.log("email sent");
-  } catch (error) {
-    if (err.code === "ENOENT") {
-      console.error("Template file not found:", err.message);
-    } else if (err.response && err.response.body) {
-      console.error("Error sending email:", err.response.body);
-    } else {
-      console.error("Error occurred:", err.message);
-    }
+
+    await sgMail.send(msg);
+    console.log("Email sent via SendGrid");
+  } catch (err) {
+    console.error("Error sending email:", err.message);
   }
 }
 
